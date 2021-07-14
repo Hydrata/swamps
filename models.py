@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields import JSONField
 from hydrata.models import GeospatialModel
 
 
@@ -37,3 +38,15 @@ class BluemountainsThpssE448032756(GeospatialModel):
         managed = True
         db_table = 'bluemountains_thpss_e_4480_32756'
 
+
+class SurveySite(GeospatialModel):
+    fid = models.AutoField(primary_key=True)
+    the_geom = models.MultiPolygonField(srid=32756, blank=True, null=True)
+    site_id = models.CharField(max_length=100)
+    name = models.CharField(max_length=1000)
+
+
+class SurveyData(GeospatialModel):
+    site = models.ForeignKey('SurveySite', on_delete=models.SET_NULL, blank=True, null=True)
+    name = models.CharField(max_length=1000)
+    data = JSONField()
