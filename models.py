@@ -3,6 +3,9 @@ from hydrata.models import GeospatialModel
 
 
 class BluemountainsThpssE448032756(GeospatialModel):
+
+    overall_status = models.CharField(max_length=256, blank=True, null=True, default='unknown')
+
     fid = models.AutoField(primary_key=True)
     the_geom = models.MultiPolygonField(srid=32756, blank=True, null=True)
     swamp_grou = models.CharField(db_column='SWAMP_GROU', max_length=254, blank=True, null=True)
