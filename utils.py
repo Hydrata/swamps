@@ -28,6 +28,9 @@ def update_from_biocollect():
                 site_data['siteGeojson']['geometry']['coordinates'] = [ast.literal_eval(site_data.get('siteGeojson').get('geometry').get('coordinates')[0])]
                 site_geojson = json.dumps(site_data.get('siteGeojson').get('geometry'))
                 geometry = GEOSGeometry(site_geojson)
+            if site_data['siteId'] == '747ac352-6ad7-438e-905a-e7a8bc2533dc':
+                # Don't want to include the site boundary in any analysis
+                geometry = None
             defaults = {
                 'name': site_data.get('name'),
                 'the_geom': geometry

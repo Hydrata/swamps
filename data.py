@@ -4318,7 +4318,7 @@ wetland_sediment_survey = json.loads('''{
 			"name": "Blue Mountains Upland Swamps",
 			"sites": [{
 					"siteId": "747ac352-6ad7-438e-905a-e7a8bc2533dc",
-					"name": "Project area for Blue Mountains Upland Swamps34",
+					"name": "Project area for Blue Mountains Upland Swamps",
 					"externalSiteId": null,
 					"type": "",
 					"catchment": "",
