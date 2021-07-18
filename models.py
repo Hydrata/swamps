@@ -41,7 +41,7 @@ class BluemountainsThpssE448032756(GeospatialModel):
 
 class SurveySite(GeospatialModel):
     fid = models.AutoField(primary_key=True)
-    the_geom = models.MultiPolygonField(srid=32756, blank=True, null=True)
+    the_geom = models.PolygonField(srid=32756, blank=True, null=True)
     site_id = models.CharField(max_length=100)
     name = models.CharField(max_length=1000)
 
