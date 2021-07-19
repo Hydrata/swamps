@@ -44,9 +44,10 @@ class SurveySite(GeospatialModel):
     the_geom = models.PolygonField(srid=32756, blank=True, null=True)
     site_id = models.CharField(max_length=100)
     name = models.CharField(max_length=1000)
+    activities = JSONField(blank=True, null=True, default=list)
 
 
 class SurveyData(GeospatialModel):
     site = models.ForeignKey('SurveySite', on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=1000)
-    data = JSONField()
+    data = JSONField(blank=True, null=True)

@@ -6,18 +6,19 @@ from swamps.models import BluemountainsThpssE448032756, SurveySite, SurveyData
 from swamps.data import biocollect_response, macro_invertebrate_survey, surface_water_mineral_composition_survey,\
     vegetation_health_survey, water_table_and_water_physics_survey, wetland_sediment_survey
 
-surveys = [
-    macro_invertebrate_survey,
-    surface_water_mineral_composition_survey,
-    vegetation_health_survey,
-    water_table_and_water_physics_survey,
-    wetland_sediment_survey
-]
-
 
 def update_from_biocollect():
     # Create/update physical survey sites
     response = {}
+    surveys = [
+        macro_invertebrate_survey,
+        surface_water_mineral_composition_survey,
+        vegetation_health_survey,
+        water_table_and_water_physics_survey,
+        wetland_sediment_survey
+    ]
+    activities = biocollect_response['data']['searchBioCollectProject'][0]['activities']
+
     for survey in surveys:
         for site_data in survey['data']['searchBioCollectProject'][0].get('sites'):
             site_geojson = json.dumps(site_data.get('siteGeojson').get('geometry'))
@@ -40,4 +41,25 @@ def update_from_biocollect():
                 defaults=defaults,
             )
 
+    for activity in activities:
+        for item in activity['outputs'][0]['data']['dataList']:
+            if item.get('key') == 'location':
+                print('---')
+                new_activities = list()
+                site = SurveySite.objects.get(site_id=item.get('value'))
+                old_activities = site.activities
+                item_exists = False
+                for old_activity in old_activities:
+                    if activity.get('activityId') == old_activity.get('activityId'):
+                        item_exists = True
+                        print(f'found activityId: {activity.get("activityId")} in site {site}')
+                        continue
+                if not item_exists:
+                    new_activities = site.activities
+                    new_activities.append(activity)
+                    print('appending: ', site, activity)
+                    site.activities = new_activities
+                    site.save()
+                print('---')
+    print('finished')
     return response
