@@ -44,8 +44,6 @@ def update_from_biocollect():
     for activity in activities:
         for item in activity['outputs'][0]['data']['dataList']:
             if item.get('key') == 'location':
-                print('---')
-                new_activities = list()
                 site = SurveySite.objects.get(site_id=item.get('value'))
                 old_activities = site.activities
                 item_exists = False
@@ -60,6 +58,4 @@ def update_from_biocollect():
                     print('appending: ', site, activity)
                     site.activities = new_activities
                     site.save()
-                print('---')
-    print('finished')
     return response
