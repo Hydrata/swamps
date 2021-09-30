@@ -4,4 +4,5 @@ app_name = 'swamps'
 
 urlpatterns = [
     url(r'^api/update-from-biocollect', api.update_from_biocollect_api, name='update_from_biocollect'),
+    url(r'^api/update-from-airtables', api.update_from_airtables_api, name='update_from_airtables'),
 ]

@@ -1,7 +1,10 @@
-import json, ast
+import json
+import ast
+import requests
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.gdal.error import GDALException
+
 from swamps.models import BluemountainsThpssE448032756, SurveySite, SurveyData
 from swamps.data import biocollect_response, macro_invertebrate_survey, surface_water_mineral_composition_survey,\
     vegetation_health_survey, water_table_and_water_physics_survey, wetland_sediment_survey
@@ -59,3 +62,32 @@ def update_from_biocollect():
                     site.activities = new_activities
                     site.save()
     return response
+
+
+def update_from_airtables():
+    #  Create/update the actual survey sites so they can be mapped
+    response = requests.get(
+        "https://api.airtable.com/v0/appc1i4ybYpQqjCBp/survey_locations?maxRecords=3&view=Grid%20view",
+        headers={'Authorization': 'Bearer key1QftQfqYQw2LvF'}
+    )
+    sites_dict = response.json().get('records')
+    for site in sites_dict:
+        fields = site.get('fields')
+        print('site: ', site)
+        print('fields: ', fields)
+        geometry = GEOSGeometry(
+            f"POINT({fields.get('longitude')} {fields.get('latitude')})",
+            srid=4326
+        )
+        defaults = {
+            'name': fields.get('name'),
+            'the_geom': geometry
+        }
+        survey_site, created = SurveySite.objects.update_or_create(
+            site_id=site.get('id'),
+            defaults=defaults,
+        )
+        if created:
+            print('created: ', survey_site)
+        else:
+            print('updated:', survey_site)
