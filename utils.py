@@ -5,7 +5,7 @@ import requests
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.gdal.error import GDALException
 
-from swamps.models import BluemountainsThpssE448032756, SurveySite, SurveyData
+from swamps.models import BluemountainsThpssE448032756, SurveySite
 from swamps.data import biocollect_response, macro_invertebrate_survey, surface_water_mineral_composition_survey,\
     vegetation_health_survey, water_table_and_water_physics_survey, wetland_sediment_survey
 
@@ -66,28 +66,51 @@ def update_from_biocollect():
 
 def update_from_airtables():
     #  Create/update the actual survey sites so they can be mapped
+    headers={'Authorization': 'Bearer key1QftQfqYQw2LvF'}
     response = requests.get(
-        "https://api.airtable.com/v0/appc1i4ybYpQqjCBp/survey_locations?maxRecords=3&view=Grid%20view",
-        headers={'Authorization': 'Bearer key1QftQfqYQw2LvF'}
+        "https://api.airtable.com/v0/appc1i4ybYpQqjCBp/survey_sites",
+        headers=headers
     )
     sites_dict = response.json().get('records')
+    site_activities = None
     for site in sites_dict:
         fields = site.get('fields')
-        print('site: ', site)
-        print('fields: ', fields)
+        accessed_fields = list()
+        if not site_activities:
+            site_activities = dict()
         geometry = GEOSGeometry(
             f"POINT({fields.get('longitude')} {fields.get('latitude')})",
             srid=4326
         )
+        try:
+            swamp = BluemountainsThpssE448032756.objects.get(fid=fields.get('swamp_fid'))
+        except BluemountainsThpssE448032756.DoesNotExist:
+            swamp = None
         defaults = {
             'name': fields.get('name'),
+            'swamp': swamp,
             'the_geom': geometry
         }
+        for field in fields.items():
+            if type(field[1]) == list and field[0] not in accessed_fields:
+                url = f"https://api.airtable.com/v0/appc1i4ybYpQqjCBp/{field[0]}/"
+                response = requests.get(url, headers=headers)
+                if response.status_code == 404:
+                    print('not found: ', url)
+                    continue
+                for record in response.json().get('records'):
+                    if site.get('id') in record.get('fields').get('location'):
+                        if not site_activities.get(field[0]):
+                            site_activities[field[0]] = list()
+                        updated_activities = site_activities.get(field[0])
+                        updated_activities.append(record)
+                        site_activities[field[0]] = updated_activities
+                accessed_fields.append(field[0])
+
         survey_site, created = SurveySite.objects.update_or_create(
             site_id=site.get('id'),
-            defaults=defaults,
+            defaults=defaults
         )
-        if created:
-            print('created: ', survey_site)
-        else:
-            print('updated:', survey_site)
+        survey_site.activities = site_activities
+        survey_site.save()
+        site_activities = None

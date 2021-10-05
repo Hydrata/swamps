@@ -38,16 +38,14 @@ class BluemountainsThpssE448032756(GeospatialModel):
         managed = True
         db_table = 'bluemountains_thpss_e_4480_32756'
 
+    def __str__(self):
+        return f"Swamp id: {self.fid}"
+
 
 class SurveySite(GeospatialModel):
+    swamp = models.ForeignKey(BluemountainsThpssE448032756, on_delete=models.SET_NULL, null=True)
     fid = models.AutoField(primary_key=True)
     the_geom = models.PointField(srid=32756, blank=True, null=True)
     site_id = models.CharField(max_length=100)
     name = models.CharField(max_length=1000)
-    activities = JSONField(blank=True, null=True, default=list)
-
-
-class SurveyData(GeospatialModel):
-    site = models.ForeignKey('SurveySite', on_delete=models.SET_NULL, blank=True, null=True)
-    name = models.CharField(max_length=1000)
-    data = JSONField(blank=True, null=True)
+    activities = JSONField(default=dict)
