@@ -92,6 +92,7 @@ def update_from_airtables():
             'the_geom': geometry
         }
         for field in fields.items():
+            print('field:', field)
             if type(field[1]) == list and field[0] not in accessed_fields:
                 url = f"https://api.airtable.com/v0/appc1i4ybYpQqjCBp/{field[0]}/"
                 response = requests.get(url, headers=headers)
