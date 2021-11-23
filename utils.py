@@ -4,6 +4,7 @@ import requests
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.gdal.error import GDALException
+from django.conf import settings
 
 from swamps.models import BluemountainsThpssE448032756, SurveySite
 from swamps.data import biocollect_response, macro_invertebrate_survey, surface_water_mineral_composition_survey,\
@@ -66,7 +67,7 @@ def update_from_biocollect():
 
 def update_from_airtables():
     #  Create/update the actual survey sites so they can be mapped
-    headers={'Authorization': 'Bearer key1QftQfqYQw2LvF'}
+    headers={'Authorization': f'Bearer {settings.AIRTABLE_KEY}'}  # Read-only airtable key
     response = requests.get(
         "https://api.airtable.com/v0/appc1i4ybYpQqjCBp/survey_sites",
         headers=headers
