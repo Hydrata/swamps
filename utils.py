@@ -1,5 +1,7 @@
 import json
 import ast
+
+import os
 import requests
 
 from django.contrib.gis.geos import GEOSGeometry
@@ -67,7 +69,7 @@ def update_from_biocollect():
 
 def update_from_airtables():
     #  Create/update the actual survey sites so they can be mapped
-    headers={'Authorization': f'Bearer {settings.AIRTABLE_KEY}'}  # Read-only airtable key
+    headers={'Authorization': f'Bearer {os.getenv("AIRTABLE_KEY")}'}  # Read-only airtable key
     response = requests.get(
         "https://api.airtable.com/v0/appc1i4ybYpQqjCBp/survey_sites",
         headers=headers
